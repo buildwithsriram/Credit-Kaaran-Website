@@ -869,6 +869,15 @@ body:has(.welcome-screen) [data-slot=dialog-overlay] {
 /* Phone home: stack the two wallets, drop the cashback flight gap,
    and browse categories as cards instead of a cramped chip rail. */
 .category-deck {display:none}
+.category-deck-list-title,.category-deck-copy {display:none}
+
+@media(min-width:851px){
+ .catalog-content {display:flex;flex-direction:column}
+ .category-summary {order:1}
+ .catalog-tools {order:2}
+ .catalog-results {order:3}
+ .catalog-disclaimer {order:4}
+}
 
 @media(max-width:850px){
  .wallet-motion-story {height:auto!important}
@@ -916,13 +925,13 @@ body:has(.welcome-screen) [data-slot=dialog-overlay] {
  .cards-browse .section-label {display:none}
  .catalog-sidebar {display:none}
  .catalog-layout {display:block}
- .catalog-content {overflow:visible!important}
- .catalog-content {overflow:visible!important}
+ .catalog-content {overflow:visible!important;display:flex;flex-direction:column}
  .category-swipe,
  .mobile-category-switch,
  .category-summary {display:none!important}
 
- .category-deck {display:block;margin:0 0 18px}
+ .catalog-content>.catalog-tools {order:1;margin:4px 0 16px}
+ .category-deck {order:2;display:block;margin:0 0 8px}
  .category-deck-kicker {
   margin:0 0 8px;
   text-align:center;
@@ -988,8 +997,8 @@ body:has(.welcome-screen) [data-slot=dialog-overlay] {
   justify-content:center;
   align-items:center;
   gap:6px;
-  min-height:28px;
-  margin:2px 0 18px;
+  min-height:22px;
+  margin:0 0 6px;
  }
  .category-deck-dots button {
   width:6px;
@@ -1004,18 +1013,22 @@ body:has(.welcome-screen) [data-slot=dialog-overlay] {
   border-radius:99px;
   background:var(--blue);
  }
+ .catalog-results {order:3}
  .category-deck-list-title {
-  margin:4px 0 8px;
+  display:block;
+  margin:10px 0 8px;
   font-size:1.05rem;
   letter-spacing:-.02em;
  }
- .category-deck-copy {
-  margin:0 0 16px;
-  color:var(--gray);
-  font-size:.875rem;
-  line-height:1.55;
- }
- .catalog-content .catalog-tools {margin-top:4px}
+ .category-deck-copy {display:none}
+ .catalog-results .catalog-count {margin:0 0 12px}
+ .catalog-results .card-grid {animation:category-list-in .32s ease}
+ .catalog-disclaimer {order:4}
+}
+
+@keyframes category-list-in {
+ from {opacity:0;transform:translateY(10px)}
+ to {opacity:1;transform:none}
 }
 
 @media(max-width:700px){
@@ -1057,4 +1070,5 @@ body:has(.welcome-screen) [data-slot=dialog-overlay] {
 
 @media(prefers-reduced-motion:reduce){
  .category-deck-card {transition:none}
+ .catalog-results .card-grid {animation:none}
 }

@@ -45,8 +45,8 @@ export default defineConfig(async () => {
 
   return {
     server: {
-      host: "0.0.0.0",
-      allowedHosts: ["terminal.local"],
+      host: "::",
+      allowedHosts: ["terminal.local", "localhost", "127.0.0.1"],
       ...(isCodexSeatbeltSandbox
         ? { watch: { useFsEvents: false, usePolling: true } }
         : {}),

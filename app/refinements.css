@@ -535,8 +535,8 @@ body:has(.welcome-screen) [data-slot=dialog-overlay] {
 /* Phone and compact-tablet layout. The earlier 600px cut-off left wide mobile
    previews in a desktop layout, which caused the clipped drawer and card rows. */
 @media(max-width:850px){
- body { overflow-x:hidden; }
- .site-body { overflow:clip; }
+ body { overflow-x:clip; }
+ .site-body { overflow:visible; }
  .main-header { top:10px; width:calc(100% - 20px); height:62px; margin-top:10px; padding:0 15px 0 17px; }
  .main-header .header-consultation { display:none; }
  .story-hero { padding:34px 20px 54px; min-height:calc(100svh - 82px); display:flex; flex-direction:column; justify-content:center; text-align:left; overflow:hidden; }
@@ -884,7 +884,7 @@ body:has(.welcome-screen) [data-slot=dialog-overlay] {
 }
 
 @media(max-width:850px){
- .wallet-motion-story {height:150svh}
+ .wallet-motion-story {height:220svh}
  .wallet-motion-stage {
   position:sticky;
   top:0;
@@ -921,15 +921,16 @@ body:has(.welcome-screen) [data-slot=dialog-overlay] {
   inset:auto;
   flex:none;
   width:100%;
-  height:min(430px,48svh);
-  min-height:300px;
+  height:min(420px,50svh);
+  min-height:280px;
   margin-top:auto;
+  overflow:visible;
  }
- .motion-wallet>img {width:min(380px,92vw);bottom:-6%;z-index:8}
- .motion-card {top:auto;bottom:26%;width:min(200px,54vw);z-index:4}
- .motion-card-one {transform:translate(calc(-50% - var(--lift-progress)*78px),calc(28px - var(--lift-progress)*118px)) rotate(calc(var(--lift-progress)*-16deg));z-index:5}
- .motion-card-two {transform:translate(-50%,calc(36px - var(--lift-progress)*158px)) scale(calc(1 + var(--lift-progress)*.07));z-index:6}
- .motion-card-three {transform:translate(calc(-50% + var(--lift-progress)*78px),calc(32px - var(--lift-progress)*112px)) rotate(calc(var(--lift-progress)*16deg));z-index:5}
+ .motion-wallet>img {width:min(380px,92vw);bottom:-8%;z-index:8}
+ .motion-card {top:auto;bottom:34%;width:min(210px,56vw);z-index:5}
+ .motion-card-one {transform:translate(calc(-50% - var(--lift-progress)*112px),calc(40px - var(--lift-progress)*210px)) rotate(calc(var(--lift-progress)*-18deg));z-index:5}
+ .motion-card-two {transform:translate(-50%,calc(48px - var(--lift-progress)*252px)) scale(calc(1 + var(--lift-progress)*.08));z-index:6}
+ .motion-card-three {transform:translate(calc(-50% + var(--lift-progress)*112px),calc(44px - var(--lift-progress)*198px)) rotate(calc(var(--lift-progress)*18deg));z-index:5}
  .motion-progress {display:none}
  .cashback-traveller {display:none!important}
  .cashback-destination .card-face {opacity:1!important}

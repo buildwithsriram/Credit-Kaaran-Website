@@ -91,15 +91,12 @@ function TestimonialSlider(){
  const [index,setIndex]=useState(0);
  const [drag,setDrag]=useState(0);
  const [live,setLive]=useState(false);
- const [dir,setDir]=useState(1);
  const startX=useRef(0);
  const dragRef=useRef(0);
  const dragging=useRef(false);
  const swiped=useRef(false);
  const go=(i:number)=>{
   const next=(i%count+count)%count;
-  const forward=(next-index+count)%count;
-  if(next!==index)setDir(forward===0||forward<=count/2?1:-1);
   setIndex(next);
   dragRef.current=0;
   setDrag(0);
@@ -115,34 +112,39 @@ function TestimonialSlider(){
   else if(dx>48)go(index-1);
   else{dragRef.current=0;setDrag(0);setLive(false);}
  };
- return <section className="testimonial-section testimonial-stage" data-reveal data-dir={dir}>
+ return <section className="testimonial-section testimonial-stage" data-reveal>
   <div className="section-wrap">
-   <div className="section-title-row"><div><h2>Avanga questions.<br/><span>Avanga next steps.</span></h2></div></div>
+   <h2>Avanga questions.<br/><span>Avanga next steps.</span></h2>
   </div>
   <div className={`testimonial-coverflow ${live?"is-dragging":""}`} aria-label="Client notes" tabIndex={0}
    style={{"--drag":`${drag}px`} as CSSProperties}
    onKeyDown={e=>{if(e.key==="ArrowRight"){e.preventDefault();go(index+1);}if(e.key==="ArrowLeft"){e.preventDefault();go(index-1);}}}
-   onPointerDown={e=>{if((e.target as HTMLElement).closest("button, .is-peek"))return;swiped.current=false;dragging.current=true;startX.current=e.clientX;dragRef.current=0;setLive(true);e.currentTarget.setPointerCapture(e.pointerId);}}
+   onPointerDown={e=>{if((e.target as HTMLElement).closest("button"))return;swiped.current=false;dragging.current=true;startX.current=e.clientX;dragRef.current=0;setLive(true);e.currentTarget.setPointerCapture(e.pointerId);}}
    onPointerMove={e=>{if(!dragging.current)return;const dx=e.clientX-startX.current;dragRef.current=dx;setDrag(dx);if(Math.abs(dx)>24)swiped.current=true;}}
    onPointerUp={endDrag}
    onPointerCancel={()=>{dragging.current=false;dragRef.current=0;setDrag(0);setLive(false);}}>
    {testimonials.map((item,i)=>{
     const offset=offsetOf(i);
     return <article key={item.name} className={`testimonial-card ${offset===0?"is-active":"is-peek"}`} style={{"--offset":offset,zIndex:10-Math.abs(offset)} as CSSProperties} onClick={()=>{if(!swiped.current&&offset!==0)go(i);}}>
-     <div className="testimonial-copy">
-      <span className="testimonial-stars" aria-label="Five star review">{[0,1,2,3,4].map(star=><Star key={star} size={16} fill="currentColor"/>)}</span>
-      <blockquote>{item.note}</blockquote>
-      <footer><strong>{item.name}</strong><span>{item.date} · paraphrased from Topmate</span></footer>
-     </div>
-     <div className="testimonial-photo"><img src={item.photo} alt=""/><b>ck.</b></div>
+     <div className="note-topline"><b>ck.</b><span className="note-marks"><span className="note-chip" aria-hidden="true"/><span className="note-contactless" aria-hidden="true"/></span></div>
+     <header>
+      <img src={item.photo} alt=""/>
+      <div>
+       <strong>{item.name}</strong>
+       <span>{item.date}</span>
+      </div>
+     </header>
+     <blockquote>{item.note}</blockquote>
+     <footer>
+      <span className="testimonial-stars" aria-label="Five star review">{[0,1,2,3,4].map(star=><Star key={star} size={13} fill="currentColor"/>)}</span>
+      <span>paraphrased from Topmate</span>
+     </footer>
     </article>;
    })}
   </div>
   <div className="testimonial-controls">
    <button type="button" aria-label="Previous note" onClick={()=>go(index-1)}><ChevronLeft size={18}/></button>
-   <div className="testimonial-dots" role="tablist" aria-label="Testimonials">
-    {testimonials.map((item,i)=><button type="button" key={item.name} className={i===index?"active":""} aria-label={item.name} aria-selected={i===index} onClick={()=>go(i)}/>)}
-   </div>
+   <div className="testimonial-progress" style={{"--index":index,"--count":count} as CSSProperties}><i/></div>
    <button type="button" aria-label="Next note" onClick={()=>go(index+1)}><ChevronRight size={18}/></button>
   </div>
  </section>;

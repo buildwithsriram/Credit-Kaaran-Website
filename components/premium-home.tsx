@@ -122,7 +122,7 @@ function TestimonialSlider(){
   <div className={`testimonial-coverflow ${live?"is-dragging":""}`} aria-label="Client notes" tabIndex={0}
    style={{"--drag":`${drag}px`} as CSSProperties}
    onKeyDown={e=>{if(e.key==="ArrowRight"){e.preventDefault();go(index+1);}if(e.key==="ArrowLeft"){e.preventDefault();go(index-1);}}}
-   onPointerDown={e=>{if((e.target as HTMLElement).closest("button"))return;swiped.current=false;dragging.current=true;startX.current=e.clientX;dragRef.current=0;setLive(true);e.currentTarget.setPointerCapture(e.pointerId);}}
+   onPointerDown={e=>{if((e.target as HTMLElement).closest("button, .is-peek"))return;swiped.current=false;dragging.current=true;startX.current=e.clientX;dragRef.current=0;setLive(true);e.currentTarget.setPointerCapture(e.pointerId);}}
    onPointerMove={e=>{if(!dragging.current)return;const dx=e.clientX-startX.current;dragRef.current=dx;setDrag(dx);if(Math.abs(dx)>24)swiped.current=true;}}
    onPointerUp={endDrag}
    onPointerCancel={()=>{dragging.current=false;dragRef.current=0;setDrag(0);setLive(false);}}>

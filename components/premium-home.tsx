@@ -61,37 +61,77 @@ function WalletScrollStory(){
 function CashbackJourney(){
  const traveller=useRef<HTMLDivElement>(null);
  useEffect(()=>{
-  if(!traveller.current)return;
-  const moving=traveller.current; let frame=0; let origin:DOMRect|null=null;
+  const moving=traveller.current; if(!moving)return;
+  let frame=0; let origin:DOMRect|null=null;
+  const clamp01=(n:number)=>Math.max(0,Math.min(1,n));
   const render=()=>{
    frame=requestAnimationFrame(render);
-   const story=document.querySelector<HTMLElement>(".wallet-motion-story"); const source=document.querySelector<HTMLElement>("#cashback-source"); const destination=document.querySelector<HTMLElement>("#cashback-destination");
+   const story=document.querySelector<HTMLElement>(".wallet-motion-story");
+   const source=document.querySelector<HTMLElement>("#cashback-source");
+   const destination=document.querySelector<HTMLElement>("#cashback-destination");
    if(!story||!source||!destination)return;
-   if(motionOff()){origin=null;source.style.opacity="";destination.style.setProperty("--cashback-arrival","1");moving.style.opacity="0";return;}
-   const phone=compactView();
-   let raw=0;
-   if(phone){
-    const dest=destination.getBoundingClientRect();
-    const settle=Math.min(innerHeight*.46, dest.height+132);
-    const span=Math.max(140, innerHeight-settle);
-    raw=1-Math.max(0,Math.min(1,(dest.top-settle)/span));
-   }else{
-    const start=story.offsetTop+Math.max(0,story.offsetHeight-innerHeight)*.7;
-    const destinationDocumentY=destination.getBoundingClientRect().top+scrollY;
-    const end=destinationDocumentY-innerHeight*.48;
-    raw=Math.max(0,Math.min(1,(scrollY-start)/Math.max(1,end-start)));
+   if(motionOff()){
+    origin=null;
+    source.classList.remove("is-airborne");
+    destination.style.setProperty("--cashback-arrival","1");
+    moving.style.opacity="0";
+    moving.style.transform="none";
+    return;
    }
-   if(raw<=0){origin=null;source.style.opacity="";destination.style.setProperty("--cashback-arrival","0");moving.style.opacity="0";return;}
-   if(!origin)origin=source.getBoundingClientRect();
-   if(raw>=1){source.style.opacity="0";destination.style.setProperty("--cashback-arrival","1");moving.style.opacity="0";return;}
-   const p=THREE.MathUtils.smootherstep(raw,0,1); const target=destination.getBoundingClientRect();
-   const hop=Math.sin(p*Math.PI)*Math.min(phone?72:150,innerHeight*(phone?.1:.18));
-   const x=THREE.MathUtils.lerp(origin.left,target.left,p); const y=THREE.MathUtils.lerp(origin.top,target.top,p)-hop;
-   const width=THREE.MathUtils.lerp(origin.width,target.width,p); const height=THREE.MathUtils.lerp(origin.height,target.height,p);
-   source.style.opacity="0";destination.style.setProperty("--cashback-arrival","0");moving.style.opacity="1";
-   moving.style.width=`${width}px`;moving.style.height=`${height}px`;moving.style.transform=`translate3d(${x}px,${y}px,0) perspective(1100px) rotateX(${Math.sin(p*Math.PI)*-8}deg) rotateY(${Math.sin(p*Math.PI)*(phone?12:20)}deg) rotateZ(${THREE.MathUtils.lerp(-1.5,0,p)}deg)`;
+   const phone=compactView();
+   const storyTop=story.getBoundingClientRect().top+scrollY;
+   const extra=Math.max(1,story.offsetHeight-innerHeight);
+   const start=storyTop+extra*(phone?.74:.7);
+   const destY=destination.getBoundingClientRect().top+scrollY;
+   const end=destY-innerHeight*(phone?.52:.48);
+   const raw=clamp01((scrollY-start)/Math.max(phone?120:1,end-start));
+   if(raw<=0){
+    origin=null;
+    source.classList.remove("is-airborne");
+    destination.style.setProperty("--cashback-arrival","0");
+    moving.style.opacity="0";
+    moving.style.transform="none";
+    return;
+   }
+   source.classList.add("is-airborne");
+   if(!origin){
+    const takeoff=source.getBoundingClientRect();
+    if(takeoff.width<8||takeoff.height<8)return;
+    origin=takeoff;
+   }
+   if(raw>=1){
+    destination.style.setProperty("--cashback-arrival","1");
+    moving.style.opacity="0";
+    moving.style.transform="none";
+    return;
+   }
+   const p=THREE.MathUtils.smootherstep(raw,0,1);
+   const target=destination.getBoundingClientRect();
+   const hop=Math.sin(p*Math.PI)*Math.min(phone?96:150,innerHeight*(phone?.14:.18));
+   const x=THREE.MathUtils.lerp(origin.left,target.left,p);
+   const y=THREE.MathUtils.lerp(origin.top,target.top,p)-hop;
+   const width=THREE.MathUtils.lerp(origin.width,target.width,p);
+   const height=THREE.MathUtils.lerp(origin.height,target.height,p);
+   destination.style.setProperty("--cashback-arrival","0");
+   moving.style.width=`${width}px`;
+   moving.style.height=`${height}px`;
+   moving.style.top="0px";
+   moving.style.left="0px";
+   moving.style.transform="none";
+   const base=moving.getBoundingClientRect();
+   moving.style.opacity="1";
+   moving.style.transform=`translate3d(${x-base.left}px,${y-base.top}px,0) perspective(1100px) rotateX(${Math.sin(p*Math.PI)*-8}deg) rotateY(${Math.sin(p*Math.PI)*(phone?12:20)}deg) rotateZ(${THREE.MathUtils.lerp(-1.5,0,p)}deg)`;
   };
-  render();return()=>{cancelAnimationFrame(frame);const source=document.querySelector<HTMLElement>("#cashback-source");const destination=document.querySelector<HTMLElement>("#cashback-destination");if(source)source.style.opacity="";if(destination)destination.style.removeProperty("--cashback-arrival");};
+  render();
+  return()=>{
+   cancelAnimationFrame(frame);
+   const source=document.querySelector<HTMLElement>("#cashback-source");
+   const destination=document.querySelector<HTMLElement>("#cashback-destination");
+   source?.classList.remove("is-airborne");
+   destination?.style.removeProperty("--cashback-arrival");
+   moving.style.opacity="0";
+   moving.style.transform="none";
+  };
  },[]);
  return <div className="cashback-traveller" ref={traveller} aria-hidden="true"><CardFace name="Cashback" tone="blue" footer="EVERYDAY SPEND"/></div>;
 }

@@ -523,11 +523,13 @@ body:has(.welcome-screen) [data-slot=dialog-overlay] {
 .wallet-preview .leather-wallet .card-face:nth-child(2) { transform:translate(0,-11px) rotate(0)!important; }
 .wallet-preview .leather-wallet .card-face:nth-child(3) { transform:translate(16px,12px) rotate(7deg)!important; }
 .wallet-preview .wallet-hover-hint { opacity:1; transform:translate(-50%,0); }
-.cashback-traveller { position:fixed; inset:0 auto auto 0; z-index:24; pointer-events:none; opacity:0; transform-origin:center; will-change:transform,width,height,opacity; }
+.cashback-traveller { position:fixed; top:0; left:0; z-index:80; pointer-events:none; opacity:0; transform-origin:center center; will-change:transform,width,height,opacity; }
 .cashback-traveller .card-face { width:100%; height:100%; aspect-ratio:auto; border-radius:18px; box-shadow:0 30px 70px #07142b45; }
 .cashback-destination { --cashback-arrival:0; }
 .cashback-destination .card-face { opacity:var(--cashback-arrival); transition:opacity .12s linear; }
 #cashback-source { transition:opacity .08s linear; }
+#cashback-source.is-airborne,
+#cashback-source.is-airborne .card-face { opacity:0!important; visibility:hidden; }
 .picks-section { position:relative; z-index:3; }
 .picks-section .matte-pick:first-child { position:relative; }
 .mobile-card-wallet { display:none; }
@@ -592,7 +594,6 @@ body:has(.welcome-screen) [data-slot=dialog-overlay] {
  .wallet-preview .leather-wallet .card-face:nth-child(1) { transform:translate(-9px,-28px) rotate(-6deg)!important; }
  .wallet-preview .leather-wallet .card-face:nth-child(2) { transform:translate(0,-9px)!important; }
  .wallet-preview .leather-wallet .card-face:nth-child(3) { transform:translate(9px,8px) rotate(6deg)!important; }
- .cashback-traveller { z-index:23; }
 }
 
 @media(prefers-reduced-motion:reduce){.cashback-traveller{display:none}.cashback-destination .card-face{opacity:1!important}}
@@ -884,7 +885,7 @@ body:has(.welcome-screen) [data-slot=dialog-overlay] {
 }
 
 @media(max-width:850px){
- .wallet-motion-story {height:220svh}
+ .wallet-motion-story {height:280svh}
  .wallet-motion-stage {
   position:sticky;
   top:0;
@@ -932,7 +933,7 @@ body:has(.welcome-screen) [data-slot=dialog-overlay] {
  .motion-card-two {transform:translate(-50%,calc(48px - var(--lift-progress)*252px)) scale(calc(1 + var(--lift-progress)*.08));z-index:6}
  .motion-card-three {transform:translate(calc(-50% + var(--lift-progress)*112px),calc(44px - var(--lift-progress)*198px)) rotate(calc(var(--lift-progress)*18deg));z-index:5}
  .motion-progress {display:none}
- .cashback-traveller {z-index:40}
+ .cashback-traveller {z-index:80}
 
  .cards-browse {padding-top:18px}
  .cards-browse>.page-heading,

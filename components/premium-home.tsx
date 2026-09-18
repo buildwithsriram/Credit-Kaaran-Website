@@ -45,9 +45,11 @@ function IntroReveal(){
  return <section id="intro" className="intro-reveal section-wrap" ref={root}><h2 aria-label={words.join(" ")}>{words.map((word,i)=><span aria-hidden="true" key={i} style={{opacity:.17+.83*Math.max(0,Math.min(1,progress*words.length-i))}}>{word} </span>)}</h2></section>;
 }
 
+const compactView=()=>window.matchMedia("(max-width: 850px)").matches;
+
 function WalletScrollStory(){
  const section=useRef<HTMLElement>(null); const [amount,setAmount]=useState(0);
- useEffect(()=>{if(motionOff())return;let raf=0;const measure=()=>{raf=0;const el=section.current;if(!el)return;const rect=el.getBoundingClientRect();const distance=Math.max(1,rect.height-innerHeight);setAmount(Math.max(0,Math.min(1,-rect.top/distance)));};const onScroll=()=>{if(!raf)raf=requestAnimationFrame(measure);};measure();addEventListener("scroll",onScroll,{passive:true});addEventListener("resize",onScroll);return()=>{removeEventListener("scroll",onScroll);removeEventListener("resize",onScroll);cancelAnimationFrame(raf);};},[]);
+ useEffect(()=>{let raf=0;const measure=()=>{raf=0;if(motionOff()||compactView()){setAmount(1);return;}const el=section.current;if(!el)return;const rect=el.getBoundingClientRect();const distance=Math.max(1,rect.height-innerHeight);setAmount(Math.max(0,Math.min(1,-rect.top/distance)));};const onScroll=()=>{if(!raf)raf=requestAnimationFrame(measure);};measure();addEventListener("scroll",onScroll,{passive:true});addEventListener("resize",onScroll);return()=>{removeEventListener("scroll",onScroll);removeEventListener("resize",onScroll);cancelAnimationFrame(raf);};},[]);
  return <section id="card-story" ref={section} className="wallet-motion-story" style={{"--story-progress":amount,"--lift-progress":Math.max(0,Math.min(1,(amount-.1)/.9))} as CSSProperties}>
   <div className="wallet-motion-stage">
    <div className="motion-copy"><h2>Unga spend sollum:<br/><span>endha card veliya varanum.</span></h2><div className="motion-steps"><p className={amount<.38?"active":""}><b>01</b>First, unga spending pattern-a paarpom.</p><p className={amount>=.38&&amount<.72?"active":""}><b>02</b>Real value change panra details-a compare pannuvom.</p><p className={amount>=.72?"active":""}><b>03</b>Ovvvoru card-kum oru clear job kuduppom.</p></div></div>
@@ -66,7 +68,7 @@ function CashbackJourney(){
    frame=requestAnimationFrame(render);
    const story=document.querySelector<HTMLElement>(".wallet-motion-story"); const source=document.querySelector<HTMLElement>("#cashback-source"); const destination=document.querySelector<HTMLElement>("#cashback-destination");
    if(!story||!source||!destination)return;
-   if(motionOff()){source.style.opacity="";destination.style.setProperty("--cashback-arrival","1");moving.style.opacity="0";return;}
+   if(motionOff()||compactView()){origin=null;source.style.opacity="";destination.style.setProperty("--cashback-arrival","1");moving.style.opacity="0";return;}
    const start=story.offsetTop+Math.max(0,story.offsetHeight-innerHeight)*.7;
    const destinationDocumentY=destination.getBoundingClientRect().top+scrollY;
    const end=destinationDocumentY-innerHeight*.48;

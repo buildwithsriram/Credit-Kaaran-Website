@@ -865,3 +865,196 @@ body:has(.welcome-screen) [data-slot=dialog-overlay] {
  .glass-hero .wallet-touch-help {display:block}
  .glass-hero .wallet-desktop-help {display:none}
 }
+
+/* Phone home: stack the two wallets, drop the cashback flight gap,
+   and browse categories as cards instead of a cramped chip rail. */
+.category-deck {display:none}
+
+@media(max-width:850px){
+ .wallet-motion-story {height:auto!important}
+ .wallet-motion-stage {
+  position:relative!important;
+  height:auto!important;
+  min-height:0!important;
+  display:flex;
+  flex-direction:column;
+  padding:48px 22px 36px!important;
+ }
+ .motion-wallet {
+  position:relative!important;
+  inset:auto!important;
+  flex:none!important;
+  width:100%;
+  height:min(360px,46svh);
+  min-height:280px;
+  margin-top:12px;
+ }
+ .motion-steps {
+  height:auto!important;
+  position:relative;
+  margin-top:20px;
+  border-top:1px solid #6d81a23d;
+ }
+ .motion-steps p {
+  position:relative!important;
+  inset:auto!important;
+  opacity:1!important;
+  transform:none!important;
+  pointer-events:auto;
+  padding:10px 0;
+  font-size:.875rem;
+  color:#172744;
+  border-bottom:1px solid #6d81a23d;
+ }
+ .cashback-traveller {display:none!important}
+ .cashback-destination .card-face {opacity:1!important}
+ #cashback-source {opacity:1!important}
+
+ .cards-browse {padding-top:18px}
+ .cards-browse>.page-heading,
+ .cards-browse>.category-tiles,
+ .cards-browse .section-label {display:none}
+ .catalog-sidebar {display:none}
+ .catalog-layout {display:block}
+ .catalog-content {overflow:visible!important}
+ .catalog-content {overflow:visible!important}
+ .category-swipe,
+ .mobile-category-switch,
+ .category-summary {display:none!important}
+
+ .category-deck {display:block;margin:0 0 18px}
+ .category-deck-kicker {
+  margin:0 0 8px;
+  text-align:center;
+  color:var(--gray);
+  font-size:.72rem;
+  letter-spacing:.12em;
+ }
+ .category-deck-title {
+  margin:0 0 6px;
+  text-align:center;
+  font-family:Raleway,Inter,sans-serif;
+  font-size:clamp(1.55rem,6vw,2rem);
+  font-weight:700;
+  letter-spacing:-.03em;
+  color:var(--ink);
+ }
+ .category-deck-rail {
+  --deck-card:min(78vw,340px);
+  display:flex;
+  gap:14px;
+  width:100vw;
+  max-width:100vw;
+  margin-left:calc(50% - 50vw);
+  padding:12px calc((100vw - var(--deck-card)) / 2) 18px;
+  overflow-x:auto;
+  overscroll-behavior-x:contain;
+  scroll-snap-type:x mandatory;
+  scroll-padding-inline:calc((100vw - var(--deck-card)) / 2);
+  scrollbar-width:none;
+  -webkit-overflow-scrolling:touch;
+ }
+ .category-deck-rail::-webkit-scrollbar {display:none}
+ .category-deck-card {
+  flex:0 0 var(--deck-card);
+  scroll-snap-align:center;
+  padding:0;
+  border:0;
+  background:none;
+  text-align:left;
+  opacity:.46;
+  transform:scale(.94);
+  transform-origin:center;
+  transition:opacity .25s ease,transform .25s ease;
+  cursor:pointer;
+ }
+ .category-deck-card[aria-current=true] {opacity:1;transform:scale(1)}
+ .category-deck-card .card-face {
+  width:100%;
+  min-height:0;
+  aspect-ratio:1.58;
+  padding:22px 24px;
+  border-radius:18px;
+  box-shadow:0 18px 36px #15213d1f;
+ }
+ .category-deck-card .card-face>strong {
+  font-size:clamp(1.35rem,5.4vw,1.7rem);
+  line-height:1.1;
+  text-transform:uppercase;
+  letter-spacing:-.03em;
+ }
+ .category-deck-dots {
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:6px;
+  min-height:28px;
+  margin:2px 0 18px;
+ }
+ .category-deck-dots button {
+  width:6px;
+  height:6px;
+  padding:0;
+  border:0;
+  border-radius:50%;
+  background:#d9d8d3;
+ }
+ .category-deck-dots button.active {
+  width:18px;
+  border-radius:99px;
+  background:var(--blue);
+ }
+ .category-deck-list-title {
+  margin:4px 0 8px;
+  font-size:1.05rem;
+  letter-spacing:-.02em;
+ }
+ .category-deck-copy {
+  margin:0 0 16px;
+  color:var(--gray);
+  font-size:.875rem;
+  line-height:1.55;
+ }
+ .catalog-content .catalog-tools {margin-top:4px}
+}
+
+@media(max-width:700px){
+ .glass-hero.story-hero,
+ .story-hero.glass-hero {
+  min-height:0!important;
+  height:auto!important;
+  overflow:visible!important;
+  justify-content:flex-start!important;
+ }
+ .glass-hero .hero-wallets,
+ .glass-hero.story-hero .hero-wallets,
+ .story-hero .hero-wallets {
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr)!important;
+  width:min(280px,78vw)!important;
+  max-width:280px!important;
+  margin:18px auto 0!important;
+  gap:6px!important;
+  padding:0!important;
+  overflow:visible!important;
+ }
+ .glass-hero .leather-choice,
+ .story-hero .leather-choice {
+  width:100%!important;
+  min-width:0!important;
+  flex:none!important;
+  padding-top:34px;
+ }
+ .glass-hero .leather-wallet,
+ .story-hero .leather-wallet {width:100%;aspect-ratio:1.18}
+ .glass-hero .wallet-caption {text-align:center;padding-left:0}
+ .glass-hero .wallet-open-instruction {order:3;margin:18px auto 0;text-align:center;max-width:28ch}
+}
+@media(max-width:430px){
+ .glass-hero .hero-wallets,
+ .story-hero .hero-wallets {width:min(255px,82vw)!important;max-width:255px!important}
+}
+
+@media(prefers-reduced-motion:reduce){
+ .category-deck-card {transition:none}
+}

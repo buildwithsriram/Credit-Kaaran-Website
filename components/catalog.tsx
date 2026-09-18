@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, ArrowUpRight, Search, X, Info, CreditCard, CalendarDays, Check, ExternalLink, MessageCircle } from "lucide-react";
 import { SidebarProvider, Sidebar, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -12,19 +12,89 @@ import { brand, categories, cards, services, categoryBySlug, money, type CardRec
 import { Breadcrumbs, CardFace, Icon, PageHeading, ServiceTiles, TickList, Questions } from "@/components/site-shell";
 
 export function ProductTile({card,onApply}:{card:CardRecord;onApply?:(card:CardRecord)=>void}) {return <article className="card-product"><Link className="card-product-link" href={`/card/${card.slug}`}><div className="card-product-art"><CardFace name={card.name} tone={card.tone} kicker={card.issuer} footer="CREDIT KAARAN COLLECTION"/></div><div className="card-product-info"><span className="eyebrow">{card.issuer}</span><h3>{card.name}</h3><p>{card.summary}</p><span className="text-link">View details<ArrowUpRight size={17}/></span></div></Link>{onApply&&<button className="quick-apply" onClick={()=>onApply(card)}>Apply<ArrowRight size={15}/></button>}</article>;}
+
+const deckSlides=[{slug:"all",name:"All cards",tone:"blue",kicker:"CREDIT KAARAN",footer:`${cards.length} CARDS · THE COLLECTION`},...categories.map(c=>({slug:c.slug,name:c.name,tone:c.tone,kicker:"CREDIT KAARAN",footer:`${cards.filter(card=>card.categories.includes(c.slug)).length} CARDS · ${c.short.toUpperCase()}`}))] as const;
+
+function CategoryDeck({category,onBrowse}:{category?:Category;onBrowse:(slug:string)=>void}) {
+ const rail=useRef<HTMLDivElement>(null);
+ const quiet=useRef(false);
+ const activeIndex=Math.max(0,deckSlides.findIndex(slide=>category?slide.slug===category.slug:slide.slug==="all"));
+ const [index,setIndex]=useState(activeIndex);
+ const centerCard=(el:HTMLElement,i:number,behavior:ScrollBehavior="smooth")=>{
+  const card=el.children[i] as HTMLElement|undefined;
+  if(!card)return;
+  el.scrollTo({left:card.offsetLeft-(el.clientWidth-card.offsetWidth)/2,behavior});
+ };
+ useEffect(()=>{
+  setIndex(activeIndex);
+  const el=rail.current; if(!el)return;
+  quiet.current=true;
+  requestAnimationFrame(()=>centerCard(el,activeIndex,"auto"));
+  const timer=window.setTimeout(()=>{quiet.current=false;},180);
+  return()=>window.clearTimeout(timer);
+ },[activeIndex]);
+ useEffect(()=>{
+  const el=rail.current; if(!el)return;
+  let frame=0; let settle:ReturnType<typeof setTimeout>|undefined;
+  const nearest=()=>{
+   const center=el.scrollLeft+el.clientWidth/2;
+   let best=0; let distance=Infinity;
+   Array.from(el.children).forEach((node,i)=>{
+    const card=node as HTMLElement;
+    const gap=Math.abs(card.offsetLeft+card.offsetWidth/2-center);
+    if(gap<distance){distance=gap;best=i;}
+   });
+   return best;
+  };
+  const onScroll=()=>{
+   if(!frame)frame=requestAnimationFrame(()=>{frame=0;setIndex(nearest());});
+   window.clearTimeout(settle);
+   settle=setTimeout(()=>{
+    if(quiet.current)return;
+    onBrowse(deckSlides[nearest()].slug);
+   },90);
+  };
+  el.addEventListener("scroll",onScroll,{passive:true});
+  return()=>{el.removeEventListener("scroll",onScroll);cancelAnimationFrame(frame);window.clearTimeout(settle);};
+ },[onBrowse]);
+ const go=(i:number)=>{
+  const el=rail.current;
+  if(el){quiet.current=true;centerCard(el,i);window.setTimeout(()=>{quiet.current=false;},220);}
+  onBrowse(deckSlides[i].slug);
+ };
+ return <section className="category-deck">
+  <p className="category-deck-kicker">{category?"YOUR CARD WALLET":"THE CARD COLLECTION"}</p>
+  <h1 className="category-deck-title">{category?`${category.name} cards`:"All cards"}</h1>
+  <div className="category-deck-rail" ref={rail} aria-label="Browse card categories">
+   {deckSlides.map((slide,i)=><button type="button" key={slide.slug} className="category-deck-card" aria-current={i===index} aria-label={`${slide.name}, ${slide.footer.toLowerCase()}`} onClick={()=>go(i)}><CardFace name={slide.name} tone={slide.tone} kicker={slide.kicker} footer={slide.footer}/></button>)}
+  </div>
+  <div className="category-deck-dots" role="tablist" aria-label="Category position">
+   {deckSlides.map((slide,i)=><button type="button" key={slide.slug} className={i===index?"active":""} role="tab" aria-selected={i===index} aria-label={slide.name} onClick={()=>go(i)}/>)}
+  </div>
+  <h2 className="category-deck-list-title">{category?"Cards in this category":"All cards"}</h2>
+  {category&&<p className="category-deck-copy">{category.description}</p>}
+ </section>;
+}
+
 export function CardCatalog({category}:{category?:Category}) {
- const categoryRail=useRef<HTMLElement>(null);
- useEffect(()=>{const rail=categoryRail.current;const active=rail?.querySelector<HTMLElement>('[aria-current="page"]');if(rail&&active)rail.scrollLeft=active.offsetLeft-rail.offsetLeft-(rail.clientWidth-active.clientWidth)/2;},[category]);
  const router=useRouter();const [query,setQuery]=useState("");const [network,setNetwork]=useState("all");const [selected,setSelected]=useState<CardRecord|null>(null);
- useEffect(()=>{const read=()=>{const q=new URLSearchParams(window.location.search);const selected=q.get("network")||"all";setQuery(q.get("q")||"");setNetwork(cards.some(c=>(!category||c.categories.includes(category.slug))&&c.network===selected)?selected:"all");};read();window.addEventListener("popstate",read);return()=>window.removeEventListener("popstate",read);},[category]);
+ const [browseSlug,setBrowseSlug]=useState(category?.slug??"all");
+ useEffect(()=>{setBrowseSlug(category?.slug??"all");},[category]);
+ const browse=useCallback((slug:string)=>{
+  setBrowseSlug(slug);
+  const href=slug==="all"?"/cards":`/cards/${slug}`;
+  if(window.location.pathname!==href)router.push(href,{scroll:false});
+ },[router]);
+ const active=browseSlug==="all"?undefined:categoryBySlug(browseSlug);
+ useEffect(()=>{const read=()=>{const q=new URLSearchParams(window.location.search);const selected=q.get("network")||"all";setQuery(q.get("q")||"");setNetwork(cards.some(c=>(!active||c.categories.includes(active.slug))&&c.network===selected)?selected:"all");};read();window.addEventListener("popstate",read);return()=>window.removeEventListener("popstate",read);},[active]);
  const update=(q:string,n:string)=>{setQuery(q);setNetwork(n);const params=new URLSearchParams(window.location.search);q?params.set("q",q):params.delete("q");n!=="all"?params.set("network",n):params.delete("network");window.history.replaceState(null,"",window.location.pathname+(params.size?`?${params}`:""));};
- const pool=cards.filter(c=>!category||c.categories.includes(category.slug));const filtered=pool.filter(c=>(network==="all"||c.network===network)&&`${c.name} ${c.issuer} ${c.summary}`.toLowerCase().includes(query.trim().toLowerCase()));
- return <><div className="catalog-layout"><aside className="catalog-sidebar" aria-label="Card categories"><SidebarProvider><Sidebar collapsible="none"><SidebarContent><span className="eyebrow">THE CARD COLLECTION</span><SidebarMenu><SidebarMenuItem><SidebarMenuButton asChild isActive={!category}><Link href="/cards">All cards<span>{cards.length}</span></Link></SidebarMenuButton></SidebarMenuItem>{categories.map(c=><SidebarMenuItem key={c.slug}><SidebarMenuButton asChild isActive={category?.slug===c.slug}><Link href={`/cards/${c.slug}`}>{c.name}<span>{cards.filter(p=>p.categories.includes(c.slug)).length}</span></Link></SidebarMenuButton></SidebarMenuItem>)}</SidebarMenu><div className="rail-help">Not sure where to start?<Link href="/consultation/first-card">Let’s talk it through<ArrowUpRight size={14}/></Link></div></SidebarContent></Sidebar></SidebarProvider></aside><div className="catalog-content">
- <nav ref={categoryRail} className="category-swipe" aria-label="Swipe card categories"><Link href="/cards" aria-current={!category?"page":undefined}>All<span>{cards.length}</span></Link>{categories.map(c=><Link key={c.slug} href={`/cards/${c.slug}`} className={`category-${c.tone}`} aria-current={category?.slug===c.slug?"page":undefined}><strong>{c.name}</strong><span>{cards.filter(card=>card.categories.includes(c.slug)).length} cards</span></Link>)}</nav>
- {category&&<div className="category-summary"><CardFace name={category.name} tone={category.tone} footer="FIND WHAT FITS YOUR LIFE"/><div><span className="eyebrow">YOUR CARD WALLET / {category.name}</span><h1>{category.line}</h1><p>{category.description}</p></div></div>}
- <div className="mobile-category-switch"><Select value={category?.slug||"all"} onValueChange={value=>{router.push(value==="all"?"/cards":`/cards/${value}`);}}><SelectTrigger aria-label="Choose card category"><SelectValue/></SelectTrigger><SelectContent><SelectItem value="all">All cards</SelectItem>{categories.map(c=><SelectItem value={c.slug} key={c.slug}>{c.name}</SelectItem>)}</SelectContent></Select></div>
+ const pool=cards.filter(c=>!active||c.categories.includes(active.slug));const filtered=pool.filter(c=>(network==="all"||c.network===network)&&`${c.name} ${c.issuer} ${c.summary}`.toLowerCase().includes(query.trim().toLowerCase()));
+ return <><div className="catalog-layout"><aside className="catalog-sidebar" aria-label="Card categories"><SidebarProvider><Sidebar collapsible="none"><SidebarContent><span className="eyebrow">THE CARD COLLECTION</span><SidebarMenu><SidebarMenuItem><SidebarMenuButton asChild isActive={!active}><Link href="/cards">All cards<span>{cards.length}</span></Link></SidebarMenuButton></SidebarMenuItem>{categories.map(c=><SidebarMenuItem key={c.slug}><SidebarMenuButton asChild isActive={active?.slug===c.slug}><Link href={`/cards/${c.slug}`}>{c.name}<span>{cards.filter(p=>p.categories.includes(c.slug)).length}</span></Link></SidebarMenuButton></SidebarMenuItem>)}</SidebarMenu><div className="rail-help">Not sure where to start?<Link href="/consultation/first-card">Let’s talk it through<ArrowUpRight size={14}/></Link></div></SidebarContent></Sidebar></SidebarProvider></aside><div className="catalog-content">
+ <CategoryDeck category={active} onBrowse={browse}/>
+ {active&&<div className="category-summary"><CardFace name={active.name} tone={active.tone} footer="FIND WHAT FITS YOUR LIFE"/><div><span className="eyebrow">YOUR CARD WALLET / {active.name}</span><h1>{active.line}</h1><p>{active.description}</p></div></div>}
+ <div className="mobile-category-switch"><Select value={active?.slug||"all"} onValueChange={browse}><SelectTrigger aria-label="Choose card category"><SelectValue/></SelectTrigger><SelectContent><SelectItem value="all">All cards</SelectItem>{categories.map(c=><SelectItem value={c.slug} key={c.slug}>{c.name}</SelectItem>)}</SelectContent></Select></div>
  <div className="catalog-tools"><label className="search-field"><span className="sr-only">Search cards and banks</span><Search size={18}/><input type="search" value={query} onChange={e=>update(e.target.value,network)} placeholder="Search cards or banks"/>{query&&<button aria-label="Clear search" onClick={()=>update("",network)}><X size={17}/></button>}</label><Select value={network} onValueChange={value=>update(query,value)}><SelectTrigger aria-label="Filter by card network"><SelectValue/></SelectTrigger><SelectContent><SelectItem value="all">All networks</SelectItem>{Array.from(new Set(pool.map(c=>c.network))).filter(n=>n!=="See issuer").map(n=><SelectItem value={n} key={n}>{n}</SelectItem>)}</SelectContent></Select></div>
- <p className="catalog-count" role="status">{filtered.length} {filtered.length===1?"card":"cards"}{category?` in ${category.name.toLowerCase()}`:" to explore"}{query?` matching “${query}”`:""}</p>
+ <p className="catalog-count" role="status">{filtered.length} {filtered.length===1?"card":"cards"}{active?` in ${active.name.toLowerCase()}`:" to explore"}{query?` matching “${query}”`:""}</p>
  {filtered.length?<div className="card-grid">{filtered.map(c=><ProductTile key={c.slug} card={c} onApply={setSelected}/>)}</div>:<div className="empty-results"><Search size={28} style={{margin:"auto",color:"#6b6b6b"}}/><h3>No cards found.</h3><p>Try a different card name, bank or network.</p><button className="button button-outline" onClick={()=>update("","all")}>Clear filters</button></div>}
  <p className="catalog-disclaimer"><Info size={17}/>Card availability, network variants, rewards and fees can change. Always review the issuer’s current product page before applying.</p>
  </div></div><Handoff open={!!selected} onClose={()=>setSelected(null)} card={selected||undefined}/></>;

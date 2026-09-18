@@ -20,11 +20,13 @@ npm ci
 npm run dev
 ```
 
-Vite prints the local address when it starts. Open that URL in your browser. The config binds to all interfaces (`0.0.0.0`); the usual local URL is:
+Vite prints the local address when it starts. Open that URL in your browser:
 
 ```text
-http://localhost:5173
+http://127.0.0.1:5173
 ```
+
+If `localhost` fails in Chrome, use `127.0.0.1` instead.
 
 If you already have Node installed with nvm:
 
@@ -73,8 +75,6 @@ This is a server-rendered Vinext application with Cloudflare integration, not a 
 
 Card applications hand off to issuer links; consultation bookings hand off to Topmate. This package does not implement a bank application backend or payment processing. Review external links and any platform-specific authentication scaffolding before moving to another host.
 
-## Export details
+## Notes
 
-Imported from `credit-kaaran-github.zip` (source commit `7a7c9f8b51c7499f69050c51be91f01dae3e0215`). Website UI and assets are unchanged. The original dependency lockfile is included. Dependencies, generated output and the original Git history are excluded.
-
-See `PROGRESS.md` and `SITE_ARCHITECTURE.md` for existing implementation notes.
+See `PROGRESS.md` and `SITE_ARCHITECTURE.md` for implementation notes and route inventory.

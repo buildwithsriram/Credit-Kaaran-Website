@@ -4,34 +4,58 @@ React 19 + TypeScript website with Vinext/Vite, Tailwind CSS and Three.js. Inclu
 
 ## Run locally
 
-Install Node.js 22.13 or newer and npm, then run:
+### Requirements
+
+- Node.js **22.13 or newer** (this repo includes `.nvmrc` set to `22`)
+- npm (comes with Node)
+
+No application secrets are required for the public content pages. A database is not required to view the site.
+
+### Install and start the dev server
 
 ```sh
+git clone https://github.com/buildwithsriram/Credit-Kaaran-Website.git
+cd Credit-Kaaran-Website
 npm ci
 npm run dev
 ```
 
-Open the local address printed by Vite.
+Vite prints the local address when it starts. Open that URL in your browser. The config binds to all interfaces (`0.0.0.0`); the usual local URL is:
 
-```sh
-npm run build
-npm start
+```text
+http://localhost:5173
 ```
 
-The standard commands are portable and do not require the legacy Linux helper scripts. No application secrets are required for the public content pages.
-
-## Add to GitHub
-
-Create an empty GitHub repository. Extract this archive and run these commands inside this folder, replacing YOUR-USERNAME and YOUR-REPO:
+If you already have Node installed with nvm:
 
 ```sh
-git init
-git add .
-git commit -m "Import Credit Kaaran website"
-git branch -M main
-git remote add origin https://github.com/YOUR-USERNAME/YOUR-REPO.git
-git push -u origin main
+nvm use
+npm ci
+npm run dev
 ```
+
+### Other commands
+
+```sh
+npm run build    # production build
+npm start        # serve the production build
+npm test         # build, then run source tests
+npm run lint     # ESLint
+```
+
+The standard npm commands are portable and do not require the legacy Linux helper scripts in `scripts/`.
+
+### Useful local routes
+
+| Path | What you should see |
+| --- | --- |
+| `/` | Home, welcome sequence, wallets |
+| `/?wallet=cards` | Card category overlay |
+| `/?wallet=consultation` | Consultation overlay |
+| `/cards` | Card catalogue |
+| `/consultation` | Consultation services |
+| `/courses`, `/webinars`, `/redemption` | Learning and points pages |
+| `/about`, `/contact`, `/privacy`, `/disclosures` | Supporting pages |
 
 ## Structure
 
@@ -51,6 +75,6 @@ Card applications hand off to issuer links; consultation bookings hand off to To
 
 ## Export details
 
-Exported from source commit `7a7c9f8b51c7499f69050c51be91f01dae3e0215`. Website UI and assets are unchanged. Only setup documentation and npm command portability were adjusted for this export. The original dependency lockfile is included. Dependencies, generated output and Git history are excluded.
+Imported from `credit-kaaran-github.zip` (source commit `7a7c9f8b51c7499f69050c51be91f01dae3e0215`). Website UI and assets are unchanged. The original dependency lockfile is included. Dependencies, generated output and the original Git history are excluded.
 
-See `PROGRESS.md` and `SITE_ARCHITECTURE.md` for existing implementation notes. A fresh dependency install/build was not run for this export; prior project checks are recorded in the progress file.
+See `PROGRESS.md` and `SITE_ARCHITECTURE.md` for existing implementation notes.

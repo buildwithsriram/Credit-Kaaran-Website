@@ -1,0 +1,4 @@
+import { Breadcrumbs, CategoryTiles, PageHeading } from "@/components/site-shell";
+import { CardCatalog } from "@/components/catalog";
+export const metadata={title:"Find your next credit card",description:"Explore credit cards by cashback, travel, UPI, fuel, dining and more. Read the details before continuing to the issuer."};
+export default function CardsPage(){return <main id="main-content" className="page-wrap"><Breadcrumbs items={[{label:"Apply for cards"}]}/><PageHeading eyebrow="YOUR CARD WALLET" title={<>A card for the way<br/><span>you live.</span></>} text="Start with what matters to you. Explore the details, then take your next step with the issuer."/><CategoryTiles/><section id="all-cards"><div className="section-label"><h2>The complete collection.</h2></div><CardCatalog/></section></main>;}

@@ -34,25 +34,23 @@ function LeatherWallet({kind,ready,order}:{kind:"cards"|"consultation";ready:boo
 
 const featuredSlugs=["axis-ace","scapia","hdfc-swiggy","hsbc-travelone","sbi-cashback"];
 const testimonials=[
- {name:"Vasanth",note:"Arvind made card choice, reward use and everyday strategy practical and easy to understand.",date:"July 2026"},
- {name:"Pushparaj",note:"The session connected income, spending and an upcoming expense into one clear card plan.",date:"February 2026"},
- {name:"Ramkumar",note:"A simple framework for matching spending to reward tiers made future decisions feel easier.",date:"February 2026"},
+ {name:"Vasanth",note:"Arvind made card choice, reward use and everyday strategy practical and easy to understand.",date:"July 2026",photo:"/testimonials/portrait-1.jpg"},
+ {name:"Pushparaj",note:"The session connected income, spending and an upcoming expense into one clear card plan.",date:"February 2026",photo:"/testimonials/portrait-3.jpg"},
+ {name:"Ramkumar",note:"A simple framework for matching spending to reward tiers made future decisions feel easier.",date:"February 2026",photo:"/testimonials/portrait-6.jpg"},
 ];
+const peekPhotos=["/testimonials/portrait-2.jpg","/testimonials/portrait-5.jpg"];
 
 function IntroReveal(){
- return <section id="intro" className="arvind-portrait">
-  <div className="arvind-portrait-frame">
-   <img src="/arvind-portrait.jpg" alt="Arvind R, Credit Kaaran" width="714" height="714"/>
-   <h2 className="arvind-portrait-name">arvind<span>.</span></h2>
-  </div>
-  <p className="arvind-portrait-copy"><strong>Naan Arvind.</strong> Unga spending-ku match aana card-a choose panna, rewards-a purinjikka, next money decision-a <em>confidence-oda</em> edukka help panren.</p>
- </section>;
+ const root=useRef<HTMLElement>(null); const [progress,setProgress]=useState(0);
+ const words="Naan Arvind. Unga spending-ku match aana card-a choose panna, rewards-a purinjikka, next money decision-a confidence-oda edukka help panren.".split(" ");
+ useEffect(()=>{if(motionOff()){setProgress(1);return;}let raf=0;const update=()=>{raf=0;if(!root.current)return;const r=root.current.getBoundingClientRect();setProgress(Math.max(0,Math.min(1,(innerHeight*.78-r.top)/(r.height*.7))));};const scroll=()=>{if(!raf)raf=requestAnimationFrame(update);};update();window.addEventListener("scroll",scroll,{passive:true});window.addEventListener("resize",scroll);return()=>{window.removeEventListener("scroll",scroll);window.removeEventListener("resize",scroll);cancelAnimationFrame(raf);};},[]);
+ return <section id="intro" className="intro-reveal section-wrap" ref={root}><h2 aria-label={words.join(" ")}>{words.map((word,i)=><span aria-hidden="true" key={i} className={word.replace(/[.,]/g,"")==="confidence-oda"?"intro-accent":"intro-word"} style={{opacity:.18+.82*Math.max(0,Math.min(1,progress*words.length-i))}}>{word} </span>)}</h2></section>;
 }
 
 function WalletScrollStory(){
  const section=useRef<HTMLElement>(null); const [amount,setAmount]=useState(0);
- useEffect(()=>{if(motionOff()){setAmount(1);return;}let raf=0;const measure=()=>{raf=0;const el=section.current;if(!el)return;const rect=el.getBoundingClientRect();const distance=Math.max(1,rect.height-innerHeight);setAmount(Math.max(0,Math.min(1,-rect.top/distance)));};const onScroll=()=>{if(!raf)raf=requestAnimationFrame(measure);};measure();addEventListener("scroll",onScroll,{passive:true});addEventListener("resize",onScroll);return()=>{removeEventListener("scroll",onScroll);removeEventListener("resize",onScroll);cancelAnimationFrame(raf);};},[]);
- return <section id="card-story" ref={section} className="wallet-motion-story" style={{"--story-progress":amount,"--lift-progress":Math.max(0,Math.min(1,(amount-.1)/.9))} as CSSProperties}>
+ useEffect(()=>{if(motionOff()){setAmount(1);return;}let raf=0;const measure=()=>{raf=0;const el=section.current;if(!el)return;const rect=el.getBoundingClientRect();const distance=Math.max(1,rect.height-innerHeight);const raw=Math.max(0,Math.min(1,-rect.top/distance));setAmount(raw*raw*(3-2*raw));};const onScroll=()=>{if(!raf)raf=requestAnimationFrame(measure);};measure();addEventListener("scroll",onScroll,{passive:true});addEventListener("resize",onScroll);return()=>{removeEventListener("scroll",onScroll);removeEventListener("resize",onScroll);cancelAnimationFrame(raf);};},[]);
+ return <section id="card-story" ref={section} className="wallet-motion-story" style={{"--story-progress":amount,"--lift-progress":Math.max(0,Math.min(1,(amount-.04)/.78))} as CSSProperties}>
   <div className="wallet-motion-stage">
    <div className="motion-copy"><h2>Unga spend sollum:<br/><span>endha card veliya varanum.</span></h2><div className="motion-steps"><p className={amount<.38?"active":""}><b>01</b>First, unga spending pattern-a paarpom.</p><p className={amount>=.38&&amount<.72?"active":""}><b>02</b>Real value change panra details-a compare pannuvom.</p><p className={amount>=.72?"active":""}><b>03</b>Ovvvoru card-kum oru clear job kuduppom.</p></div></div>
    <div className="motion-wallet" aria-hidden="true"><span className="motion-card motion-card-one"><CardFace name="Travel" tone="silver" footer="MILES & STAYS"/></span><span id="cashback-source" className="motion-card motion-card-two"><CardFace name="Cashback" tone="blue" footer="EVERYDAY SPEND"/></span><span className="motion-card motion-card-three"><CardFace name="UPI" tone="carbon" footer="SCAN & PAY"/></span><img src="/wallet-blue.webp" alt="" width="1000" height="667"/></div>
@@ -90,45 +88,35 @@ function CashbackJourney(){
 }
 
 function TestimonialSlider(){
- const rail=useRef<HTMLDivElement>(null);
+ const count=testimonials.length;
  const [index,setIndex]=useState(0);
- const go=(i:number)=>{
-  const el=rail.current; const card=el?.children[i] as HTMLElement|undefined;
-  if(!el||!card)return;
-  el.scrollTo({left:card.offsetLeft-(el.clientWidth-card.offsetWidth)/2,behavior:motionOff()?"auto":"smooth"});
- };
- useEffect(()=>{
-  const el=rail.current; if(!el)return;
-  const sync=()=>{
-   const center=el.scrollLeft+el.clientWidth/2;
-   let best=0; let distance=Infinity;
-   Array.from(el.children).forEach((node,i)=>{
-    const card=node as HTMLElement;
-    const gap=Math.abs(card.offsetLeft+card.offsetWidth/2-center);
-    if(gap<distance){distance=gap;best=i;}
-   });
-   setIndex(best);
-  };
-  sync();
-  el.addEventListener("scroll",sync,{passive:true});
-  const start=()=>requestAnimationFrame(()=>go(0));
-  start();
-  addEventListener("resize",start);
-  return()=>{el.removeEventListener("scroll",sync);removeEventListener("resize",start);};
- },[]);
+ const startX=useRef(0);
+ const dragging=useRef(false);
+ const swiped=useRef(false);
+ const go=(i:number)=>setIndex((i%count+count)%count);
+ const offsetOf=(i:number)=>{let d=i-index;if(d>count/2)d-=count;if(d<-count/2)d+=count;return d;};
  return <section className="testimonial-section testimonial-stage" data-reveal>
   <div className="section-wrap">
    <div className="section-title-row"><div><h2>Avanga questions.<br/><span>Avanga next steps.</span></h2></div></div>
   </div>
-  <div className="testimonial-rail" ref={rail} aria-label="Client notes">
-   {testimonials.map((item,i)=><article className={`testimonial-card ${i===index?"is-active":""}`} key={item.name}>
-    <div className="testimonial-copy">
-     <span className="testimonial-stars" aria-label="Five star review">{[0,1,2,3,4].map(n=><Star key={n} size={16} fill="currentColor"/>)}</span>
-     <blockquote>{item.note}</blockquote>
-     <footer><strong>{item.name}</strong><span>{item.date} · paraphrased from Topmate</span></footer>
-    </div>
-    <div className="testimonial-mark" aria-hidden="true"><span>{item.name.slice(0,1)}</span><b>ck.</b></div>
-   </article>)}
+  <div className="testimonial-coverflow" aria-label="Client notes"
+   onPointerDown={e=>{dragging.current=true;swiped.current=false;startX.current=e.clientX;e.currentTarget.setPointerCapture(e.pointerId);}}
+   onPointerMove={e=>{if(!dragging.current)return;if(Math.abs(e.clientX-startX.current)>28)swiped.current=true;}}
+   onPointerUp={e=>{if(!dragging.current)return;dragging.current=false;const dx=e.clientX-startX.current;if(dx<-42)go(index+1);else if(dx>42)go(index-1);}}
+   onPointerCancel={()=>{dragging.current=false;}}>
+   <figure className="testimonial-far testimonial-far-left" aria-hidden="true"><img src={peekPhotos[0]} alt=""/></figure>
+   {testimonials.map((item,i)=>{
+    const offset=offsetOf(i);
+    return <article key={item.name} className={`testimonial-card ${offset===0?"is-active":"is-peek"}`} style={{"--offset":offset,zIndex:10-Math.abs(offset)} as CSSProperties} onClick={()=>{if(!swiped.current&&offset!==0)go(i);}}>
+     <div className="testimonial-copy">
+      <span className="testimonial-stars" aria-label="Five star review">{[0,1,2,3,4].map(star=><Star key={star} size={16} fill="currentColor"/>)}</span>
+      <blockquote>{item.note}</blockquote>
+      <footer><strong>{item.name}</strong><span>{item.date} · paraphrased from Topmate</span></footer>
+     </div>
+     <div className="testimonial-photo"><img src={item.photo} alt=""/><b>ck.</b></div>
+    </article>;
+   })}
+   <figure className="testimonial-far testimonial-far-right" aria-hidden="true"><img src={peekPhotos[1]} alt=""/></figure>
   </div>
   <div className="testimonial-dots" role="tablist" aria-label="Testimonials">
    {testimonials.map((item,i)=><button type="button" key={item.name} className={i===index?"active":""} aria-label={item.name} aria-selected={i===index} onClick={()=>go(i)}/>)}
@@ -152,7 +140,7 @@ export function HomeExperience() {
   <main id="main-content">
    <section className={`premium-hero story-hero glass-hero ${intro==="done"?"hero-entered":""}`}>
     <div className="hero-ambient" aria-hidden="true"/><div className="hero-glass-light" aria-hidden="true"/>
-    <div className="hero-heading"><div className="hero-title-target"><p className="hero-person">Vanakkam, naan Arvind.</p><h1><span>Unga Credit</span>{" "}Kaaran<span className="hero-period">.</span></h1></div><p className="hero-intro">Cards-a smart-ah choose pannunga.<br/>Rewards-a full-ah use pannunga.</p></div>
+    <div className="hero-heading"><div className="hero-title-target"><p className="hero-person">Vanakkam, naan Arvind.</p><h1><span>Unga Credit</span><br/>Kaaran<span className="hero-period">.</span></h1></div><p className="hero-intro">Cards-a smart-ah choose pannunga.<br/>Rewards-a full-ah use pannunga.</p></div>
     <p className="wallet-open-instruction">Rendu wallets. Unga next step.</p>
     <div className="hero-wallets"><LeatherWallet kind="cards" ready={intro==="done"} order={0}/><LeatherWallet kind="consultation" ready={intro==="done"} order={1}/></div>
     <a className="hero-story-cue" href="#intro">Scroll to see the story<ArrowDown size={16}/></a>

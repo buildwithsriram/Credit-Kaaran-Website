@@ -932,9 +932,7 @@ body:has(.welcome-screen) [data-slot=dialog-overlay] {
  .motion-card-two {transform:translate(-50%,calc(48px - var(--lift-progress)*252px)) scale(calc(1 + var(--lift-progress)*.08));z-index:6}
  .motion-card-three {transform:translate(calc(-50% + var(--lift-progress)*112px),calc(44px - var(--lift-progress)*198px)) rotate(calc(var(--lift-progress)*18deg));z-index:5}
  .motion-progress {display:none}
- .cashback-traveller {display:none!important}
- .cashback-destination .card-face {opacity:1!important}
- #cashback-source {opacity:1!important}
+ .cashback-traveller {z-index:40}
 
  .cards-browse {padding-top:18px}
  .cards-browse>.page-heading,

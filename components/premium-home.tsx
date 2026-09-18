@@ -9,6 +9,7 @@ import { CardFace, Questions, useWallet } from "@/components/site-shell";
 import { brand, cards } from "@/lib/site-content";
 
 const motionOff=()=>window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const compactView=()=>window.matchMedia("(max-width: 850px)").matches;
 
 function LeatherWallet({kind,ready,order}:{kind:"cards"|"consultation";ready:boolean;order:number}) {
  const {openWallet}=useWallet(); const [eject,setEject]=useState(false); const [preview,setPreview]=useState(false); const timer=useRef<ReturnType<typeof setTimeout>|null>(null);
@@ -39,17 +40,18 @@ const testimonials=[
 ];
 
 function IntroReveal(){
- const root=useRef<HTMLElement>(null); const [progress,setProgress]=useState(0);
- const words="Naan Arvind. Unga spending-ku match aana card-a choose panna, rewards-a purinjikka, next money decision-a confidence-oda edukka help panren.".split(" ");
- useEffect(()=>{if(motionOff()){setProgress(1);return;}let raf=0;const update=()=>{raf=0;if(!root.current)return;const r=root.current.getBoundingClientRect();setProgress(Math.max(0,Math.min(1,(innerHeight*.78-r.top)/(r.height*.7))));};const scroll=()=>{if(!raf)raf=requestAnimationFrame(update);};update();window.addEventListener("scroll",scroll,{passive:true});window.addEventListener("resize",scroll);return()=>{window.removeEventListener("scroll",scroll);window.removeEventListener("resize",scroll);cancelAnimationFrame(raf);};},[]);
- return <section id="intro" className="intro-reveal section-wrap" ref={root}><h2 aria-label={words.join(" ")}>{words.map((word,i)=><span aria-hidden="true" key={i} style={{opacity:.17+.83*Math.max(0,Math.min(1,progress*words.length-i))}}>{word} </span>)}</h2></section>;
+ return <section id="intro" className="arvind-portrait">
+  <div className="arvind-portrait-frame">
+   <img src="/arvind-portrait.jpg" alt="Arvind R, Credit Kaaran" width="714" height="714"/>
+   <h2 className="arvind-portrait-name">arvind<span>.</span></h2>
+  </div>
+  <p className="arvind-portrait-copy"><strong>Naan Arvind.</strong> Unga spending-ku match aana card-a choose panna, rewards-a purinjikka, next money decision-a <em>confidence-oda</em> edukka help panren.</p>
+ </section>;
 }
-
-const compactView=()=>window.matchMedia("(max-width: 850px)").matches;
 
 function WalletScrollStory(){
  const section=useRef<HTMLElement>(null); const [amount,setAmount]=useState(0);
- useEffect(()=>{let raf=0;const measure=()=>{raf=0;if(motionOff()||compactView()){setAmount(1);return;}const el=section.current;if(!el)return;const rect=el.getBoundingClientRect();const distance=Math.max(1,rect.height-innerHeight);setAmount(Math.max(0,Math.min(1,-rect.top/distance)));};const onScroll=()=>{if(!raf)raf=requestAnimationFrame(measure);};measure();addEventListener("scroll",onScroll,{passive:true});addEventListener("resize",onScroll);return()=>{removeEventListener("scroll",onScroll);removeEventListener("resize",onScroll);cancelAnimationFrame(raf);};},[]);
+ useEffect(()=>{if(motionOff()){setAmount(1);return;}let raf=0;const measure=()=>{raf=0;const el=section.current;if(!el)return;const rect=el.getBoundingClientRect();const distance=Math.max(1,rect.height-innerHeight);setAmount(Math.max(0,Math.min(1,-rect.top/distance)));};const onScroll=()=>{if(!raf)raf=requestAnimationFrame(measure);};measure();addEventListener("scroll",onScroll,{passive:true});addEventListener("resize",onScroll);return()=>{removeEventListener("scroll",onScroll);removeEventListener("resize",onScroll);cancelAnimationFrame(raf);};},[]);
  return <section id="card-story" ref={section} className="wallet-motion-story" style={{"--story-progress":amount,"--lift-progress":Math.max(0,Math.min(1,(amount-.1)/.9))} as CSSProperties}>
   <div className="wallet-motion-stage">
    <div className="motion-copy"><h2>Unga spend sollum:<br/><span>endha card veliya varanum.</span></h2><div className="motion-steps"><p className={amount<.38?"active":""}><b>01</b>First, unga spending pattern-a paarpom.</p><p className={amount>=.38&&amount<.72?"active":""}><b>02</b>Real value change panra details-a compare pannuvom.</p><p className={amount>=.72?"active":""}><b>03</b>Ovvvoru card-kum oru clear job kuduppom.</p></div></div>
@@ -87,6 +89,52 @@ function CashbackJourney(){
  return <div className="cashback-traveller" ref={traveller} aria-hidden="true"><CardFace name="Cashback" tone="blue" footer="EVERYDAY SPEND"/></div>;
 }
 
+function TestimonialSlider(){
+ const rail=useRef<HTMLDivElement>(null);
+ const [index,setIndex]=useState(0);
+ const go=(i:number)=>{
+  const el=rail.current; const card=el?.children[i] as HTMLElement|undefined;
+  if(!el||!card)return;
+  el.scrollTo({left:card.offsetLeft-(el.clientWidth-card.offsetWidth)/2,behavior:motionOff()?"auto":"smooth"});
+ };
+ useEffect(()=>{
+  const el=rail.current; if(!el)return;
+  const sync=()=>{
+   const center=el.scrollLeft+el.clientWidth/2;
+   let best=0; let distance=Infinity;
+   Array.from(el.children).forEach((node,i)=>{
+    const card=node as HTMLElement;
+    const gap=Math.abs(card.offsetLeft+card.offsetWidth/2-center);
+    if(gap<distance){distance=gap;best=i;}
+   });
+   setIndex(best);
+  };
+  sync();
+  el.addEventListener("scroll",sync,{passive:true});
+  const start=()=>requestAnimationFrame(()=>go(0));
+  start();
+  addEventListener("resize",start);
+  return()=>{el.removeEventListener("scroll",sync);removeEventListener("resize",start);};
+ },[]);
+ return <section className="testimonial-section testimonial-stage" data-reveal>
+  <div className="section-wrap">
+   <div className="section-title-row"><div><h2>Avanga questions.<br/><span>Avanga next steps.</span></h2></div></div>
+  </div>
+  <div className="testimonial-rail" ref={rail} aria-label="Client notes">
+   {testimonials.map((item,i)=><article className={`testimonial-card ${i===index?"is-active":""}`} key={item.name}>
+    <div className="testimonial-copy">
+     <span className="testimonial-stars" aria-label="Five star review">{[0,1,2,3,4].map(n=><Star key={n} size={16} fill="currentColor"/>)}</span>
+     <blockquote>{item.note}</blockquote>
+     <footer><strong>{item.name}</strong><span>{item.date} · paraphrased from Topmate</span></footer>
+    </div>
+    <div className="testimonial-mark" aria-hidden="true"><span>{item.name.slice(0,1)}</span><b>ck.</b></div>
+   </article>)}
+  </div>
+  <div className="testimonial-dots" role="tablist" aria-label="Testimonials">
+   {testimonials.map((item,i)=><button type="button" key={item.name} className={i===index?"active":""} aria-label={item.name} aria-selected={i===index} onClick={()=>go(i)}/>)}
+  </div>
+ </section>;
+}
 export function HomeExperience() {
  const [intro,setIntro]=useState<"open"|"closing"|"done">("open"); const [progress,setProgress]=useState(0); const [replay,setReplay]=useState(0); const {openWallet}=useWallet();
  useEffect(()=>{
@@ -107,7 +155,7 @@ export function HomeExperience() {
     <div className="hero-heading"><div className="hero-title-target"><p className="hero-person">Vanakkam, naan Arvind.</p><h1><span>Unga Credit</span>{" "}Kaaran<span className="hero-period">.</span></h1></div><p className="hero-intro">Cards-a smart-ah choose pannunga.<br/>Rewards-a full-ah use pannunga.</p></div>
     <p className="wallet-open-instruction">Rendu wallets. Unga next step.</p>
     <div className="hero-wallets"><LeatherWallet kind="cards" ready={intro==="done"} order={0}/><LeatherWallet kind="consultation" ready={intro==="done"} order={1}/></div>
-
+    <a className="hero-story-cue" href="#intro">Scroll to see the story<ArrowDown size={16}/></a>
    </section>
 
    <IntroReveal/>
@@ -129,7 +177,7 @@ export function HomeExperience() {
     </div>
    </section>
 
-   <section className="testimonial-section section-wrap" data-reveal><div className="section-title-row"><div><h2>Avanga questions.<br/><span>Avanga next steps.</span></h2></div></div><div className="testimonial-rail">{testimonials.map((item,i)=><article className="testimonial-card" key={item.name}><div><span className="testimonial-stars" aria-label="Five star review">{[0,1,2,3,4].map(n=><Star key={n} size={14} fill="currentColor"/>)}</span><span>0{i+1}</span></div><blockquote>{item.note}</blockquote><footer><strong>{item.name}</strong><span>{item.date} · paraphrased from Topmate</span></footer></article>)}</div></section>
+   <TestimonialSlider/>
 
    <section className="learn-section section-wrap" data-reveal><div className="course-bridge"><div><span className="eyebrow">CIBIL BOOSTER · 6–8 HOURS</span><h2>Suggestion-la start pannunga.<br/><span>Decision-a neengale edukka kathukonga.</span></h2><p>Understand scores, borrowing behaviour, card selection and the habits behind a healthier credit profile. Planned price range: ₹3,000–₹5,000.</p><Link href="/courses" className="button button-dark">Course-a explore pannunga<BookOpen size={18}/></Link></div><CardFace name="CIBIL Booster" tone="carbon" kicker="CREDIT KAARAN COURSE" footer="LEARN AT YOUR PACE"/></div>
     <div className="webinar-bridge"><div><CalendarDays size={28}/><span className="eyebrow">MONTHLY · 2 HOURS · ₹400</span><h3>Live-ah learn pannalama?</h3><p>Join a guided session from credit-card basics to advanced rewards, with room for the questions everyone is thinking.</p></div><Link href="/webinars" className="button button-outline">Next webinar-a paarunga<ArrowUpRight size={18}/></Link></div>

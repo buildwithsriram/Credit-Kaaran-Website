@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import Link from "next/link";
 import * as THREE from "three";
-import { ArrowDown, ArrowRight, ArrowUpRight, Check, CreditCard, RotateCcw, BookOpen, CalendarDays, Star } from "lucide-react";
+import { ArrowDown, ArrowRight, ArrowUpRight, Check, ChevronLeft, ChevronRight, CreditCard, RotateCcw, BookOpen, CalendarDays, Star } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { CardFace, Questions, useWallet } from "@/components/site-shell";
 import { brand, cards } from "@/lib/site-content";
@@ -38,7 +38,6 @@ const testimonials=[
  {name:"Pushparaj",note:"The session connected income, spending and an upcoming expense into one clear card plan.",date:"February 2026",photo:"/testimonials/portrait-3.jpg"},
  {name:"Ramkumar",note:"A simple framework for matching spending to reward tiers made future decisions feel easier.",date:"February 2026",photo:"/testimonials/portrait-6.jpg"},
 ];
-const peekPhotos=["/testimonials/portrait-2.jpg","/testimonials/portrait-5.jpg"];
 
 function IntroReveal(){
  const root=useRef<HTMLElement>(null); const [progress,setProgress]=useState(0);
@@ -90,21 +89,43 @@ function CashbackJourney(){
 function TestimonialSlider(){
  const count=testimonials.length;
  const [index,setIndex]=useState(0);
+ const [drag,setDrag]=useState(0);
+ const [live,setLive]=useState(false);
+ const [dir,setDir]=useState(1);
  const startX=useRef(0);
+ const dragRef=useRef(0);
  const dragging=useRef(false);
  const swiped=useRef(false);
- const go=(i:number)=>setIndex((i%count+count)%count);
+ const go=(i:number)=>{
+  const next=(i%count+count)%count;
+  const forward=(next-index+count)%count;
+  if(next!==index)setDir(forward===0||forward<=count/2?1:-1);
+  setIndex(next);
+  dragRef.current=0;
+  setDrag(0);
+  setLive(false);
+  dragging.current=false;
+ };
  const offsetOf=(i:number)=>{let d=i-index;if(d>count/2)d-=count;if(d<-count/2)d+=count;return d;};
- return <section className="testimonial-section testimonial-stage" data-reveal>
+ const endDrag=()=>{
+  if(!dragging.current)return;
+  dragging.current=false;
+  const dx=dragRef.current;
+  if(dx<-48)go(index+1);
+  else if(dx>48)go(index-1);
+  else{dragRef.current=0;setDrag(0);setLive(false);}
+ };
+ return <section className="testimonial-section testimonial-stage" data-reveal data-dir={dir}>
   <div className="section-wrap">
    <div className="section-title-row"><div><h2>Avanga questions.<br/><span>Avanga next steps.</span></h2></div></div>
   </div>
-  <div className="testimonial-coverflow" aria-label="Client notes"
-   onPointerDown={e=>{dragging.current=true;swiped.current=false;startX.current=e.clientX;e.currentTarget.setPointerCapture(e.pointerId);}}
-   onPointerMove={e=>{if(!dragging.current)return;if(Math.abs(e.clientX-startX.current)>28)swiped.current=true;}}
-   onPointerUp={e=>{if(!dragging.current)return;dragging.current=false;const dx=e.clientX-startX.current;if(dx<-42)go(index+1);else if(dx>42)go(index-1);}}
-   onPointerCancel={()=>{dragging.current=false;}}>
-   <figure className="testimonial-far testimonial-far-left" aria-hidden="true"><img src={peekPhotos[0]} alt=""/></figure>
+  <div className={`testimonial-coverflow ${live?"is-dragging":""}`} aria-label="Client notes" tabIndex={0}
+   style={{"--drag":`${drag}px`} as CSSProperties}
+   onKeyDown={e=>{if(e.key==="ArrowRight"){e.preventDefault();go(index+1);}if(e.key==="ArrowLeft"){e.preventDefault();go(index-1);}}}
+   onPointerDown={e=>{if((e.target as HTMLElement).closest("button"))return;swiped.current=false;dragging.current=true;startX.current=e.clientX;dragRef.current=0;setLive(true);e.currentTarget.setPointerCapture(e.pointerId);}}
+   onPointerMove={e=>{if(!dragging.current)return;const dx=e.clientX-startX.current;dragRef.current=dx;setDrag(dx);if(Math.abs(dx)>24)swiped.current=true;}}
+   onPointerUp={endDrag}
+   onPointerCancel={()=>{dragging.current=false;dragRef.current=0;setDrag(0);setLive(false);}}>
    {testimonials.map((item,i)=>{
     const offset=offsetOf(i);
     return <article key={item.name} className={`testimonial-card ${offset===0?"is-active":"is-peek"}`} style={{"--offset":offset,zIndex:10-Math.abs(offset)} as CSSProperties} onClick={()=>{if(!swiped.current&&offset!==0)go(i);}}>
@@ -116,10 +137,13 @@ function TestimonialSlider(){
      <div className="testimonial-photo"><img src={item.photo} alt=""/><b>ck.</b></div>
     </article>;
    })}
-   <figure className="testimonial-far testimonial-far-right" aria-hidden="true"><img src={peekPhotos[1]} alt=""/></figure>
   </div>
-  <div className="testimonial-dots" role="tablist" aria-label="Testimonials">
-   {testimonials.map((item,i)=><button type="button" key={item.name} className={i===index?"active":""} aria-label={item.name} aria-selected={i===index} onClick={()=>go(i)}/>)}
+  <div className="testimonial-controls">
+   <button type="button" aria-label="Previous note" onClick={()=>go(index-1)}><ChevronLeft size={18}/></button>
+   <div className="testimonial-dots" role="tablist" aria-label="Testimonials">
+    {testimonials.map((item,i)=><button type="button" key={item.name} className={i===index?"active":""} aria-label={item.name} aria-selected={i===index} onClick={()=>go(i)}/>)}
+   </div>
+   <button type="button" aria-label="Next note" onClick={()=>go(index+1)}><ChevronRight size={18}/></button>
   </div>
  </section>;
 }

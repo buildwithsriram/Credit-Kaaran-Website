@@ -1044,20 +1044,21 @@ body:has(.welcome-screen) [data-slot=dialog-overlay] {
 @media(max-width:700px){
  .glass-hero.story-hero,
  .story-hero.glass-hero {
-  min-height:0!important;
+  min-height:calc(100svh - 72px)!important;
   height:auto!important;
   overflow:visible!important;
   justify-content:flex-start!important;
+  padding-bottom:8px!important;
  }
  .glass-hero .hero-wallets,
  .glass-hero.story-hero .hero-wallets,
  .story-hero .hero-wallets {
   display:grid!important;
   grid-template-columns:minmax(0,1fr)!important;
-  width:min(280px,78vw)!important;
-  max-width:280px!important;
-  margin:18px auto 0!important;
-  gap:6px!important;
+  width:min(200px,62vw)!important;
+  max-width:200px!important;
+  margin:6px auto 0!important;
+  gap:0!important;
   padding:0!important;
   overflow:visible!important;
  }
@@ -1066,16 +1067,17 @@ body:has(.welcome-screen) [data-slot=dialog-overlay] {
   width:100%!important;
   min-width:0!important;
   flex:none!important;
-  padding-top:34px;
+  padding-top:18px;
  }
  .glass-hero .leather-wallet,
- .story-hero .leather-wallet {width:100%;aspect-ratio:1.18}
+ .story-hero .leather-wallet {width:100%;aspect-ratio:1.12}
  .glass-hero .wallet-caption {text-align:center;padding-left:0}
- .glass-hero .wallet-open-instruction {order:3;margin:18px auto 0;text-align:center;max-width:28ch}
+ .glass-hero .wallet-open-instruction {display:none}
+ .glass-hero .hero-story-cue {margin:auto auto 2px;width:100%}
 }
 @media(max-width:430px){
  .glass-hero .hero-wallets,
- .story-hero .hero-wallets {width:min(255px,82vw)!important;max-width:255px!important}
+ .story-hero .hero-wallets {width:min(188px,66vw)!important;max-width:188px!important}
 }
 
 @media(prefers-reduced-motion:reduce){
@@ -1177,21 +1179,22 @@ body:has(.welcome-screen) [data-slot=dialog-overlay] {
 .testimonial-stage .section-wrap {padding-bottom:0}
 .testimonial-stage .section-title-row {margin-bottom:8px}
 .testimonial-stage .testimonial-rail {
+ --slide:min(720px,72vw);
  display:flex;
- gap:18px;
+ gap:16px;
  width:100%;
  margin:28px 0 0;
- padding:18px max(18px,calc((100vw - min(860px,82vw))/2)) 28px;
+ padding:18px max(16px,calc((100vw - var(--slide))/2)) 28px;
  overflow-x:auto;
  overscroll-behavior-x:contain;
  scroll-snap-type:x mandatory;
- scroll-padding-inline:max(18px,calc((100vw - min(860px,82vw))/2));
+ scroll-padding-inline:max(16px,calc((100vw - var(--slide))/2));
  scrollbar-width:none;
  -webkit-overflow-scrolling:touch;
 }
 .testimonial-stage .testimonial-rail::-webkit-scrollbar {display:none}
 .testimonial-stage .testimonial-card {
- flex:0 0 min(860px,82vw);
+ flex:0 0 var(--slide);
  min-height:340px;
  margin:0;
  padding:0;
@@ -1366,8 +1369,8 @@ body:has(.welcome-screen) [data-slot=dialog-overlay] {
  .quick-details {display:inline-flex}
  .card-product-info>.text-link {display:none}
  .testimonial-stage {padding-top:56px;padding-bottom:64px}
+ .testimonial-stage .testimonial-rail {--slide:min(720px,78vw)}
  .testimonial-stage .testimonial-card {
-  flex-basis:min(860px,86vw);
   min-height:0;
   grid-template-columns:1fr;
  }
@@ -1388,7 +1391,6 @@ body:has(.welcome-screen) [data-slot=dialog-overlay] {
 }
 
 @media(max-width:700px){
- .glass-hero .hero-story-cue {margin-top:10px}
  .card-product {padding-bottom:62px}
  .quick-details,.card-product-actions .quick-apply {min-height:40px;font-size:.8rem}
 }
